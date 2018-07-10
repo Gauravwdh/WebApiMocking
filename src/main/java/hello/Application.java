@@ -58,7 +58,7 @@ public class Application {
     public static void main(String[] args) throws Exception {
         gson = new Gson();
         jedis = new Jedis("redis");
-        String auth = System.getProperty("auth");
+        String auth = System.getenv("auth");
         System.out.println("Redis auth: " + auth);
         jedis.auth(auth);
         jedis.flushAll();
