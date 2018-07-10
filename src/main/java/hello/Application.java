@@ -33,6 +33,7 @@ public class Application {
   public ResponseEntity<Void> addMockResponse(HttpServletRequest request,
       @RequestBody String body) {
     String key = request.getRequestURI();
+    key = key.replace("mock_create", "mock");
     APIData apiData = gson.fromJson(body, APIData.class);
     if (apiData == null) {
       log("Unable to save value for key: " + key + " value is null: " + body);
@@ -81,7 +82,8 @@ public class Application {
         headers.add("content-type", apiData.produce);
       }
       log("found and returned value for key: " + url + ", method: " + httpMethod);
-      return new ResponseEntity<>(apiData.body, headers, HttpStatus.valueOf(apiData.statusCode));
+      return new ResponseEntity<>("" + apiData.body, headers,
+          HttpStatus.valueOf(apiData.statusCode));
     }
     log("Value found for key: " + url + ", but different method: " + apiData);
     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
