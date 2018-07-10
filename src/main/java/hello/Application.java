@@ -58,7 +58,9 @@ public class Application {
     public static void main(String[] args) throws Exception {
         gson = new Gson();
         jedis = new Jedis("redis");
-        jedis.auth(System.getProperty("auth"));
+        String auth = System.getProperty("auth");
+        System.out.println("Redis auth: " + auth);
+        jedis.auth(auth);
         jedis.flushAll();
         SpringApplication.run(Application.class, args);
     }
