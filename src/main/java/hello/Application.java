@@ -57,7 +57,9 @@ public class Application {
 
     public static void main(String[] args) throws Exception {
         gson = new Gson();
-        jedis = new Jedis("docker06.helpchat.in");
+        jedis = new Jedis("redis");
+        jedis.auth("kar.95424");
+        jedis.flushAll();
         SpringApplication.run(Application.class, args);
     }
 
