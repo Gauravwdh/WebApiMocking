@@ -39,6 +39,7 @@ public class Application {
       log("Unable to save value for key: " + key + " value is null: " + body);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    key += "_" + apiData.method.toLowerCase();
     String s = jedis.set(key, new JsonParser().parse(body).getAsJsonObject().toString());
     log("Value saved for key: " + key + ", response: " + s);
     return new ResponseEntity<>(HttpStatus.CREATED);
@@ -48,6 +49,7 @@ public class Application {
   public ResponseEntity<String> getMockResponse(HttpServletRequest request,
       @RequestBody String body) throws InterruptedException {
     String key = request.getRequestURI();
+    key += "_post";
     return getMockResponse(HttpMethod.POST, key);
   }
 
@@ -56,6 +58,7 @@ public class Application {
   public ResponseEntity<String> getMockResponsePut(HttpServletRequest request,
       @RequestBody String body) throws InterruptedException {
     String key = request.getRequestURI();
+    key += "_put";
     return getMockResponse(HttpMethod.PUT, key);
   }
 
@@ -63,6 +66,7 @@ public class Application {
   public ResponseEntity<String> getMockResponse(HttpServletRequest request)
       throws InterruptedException {
     String key = request.getRequestURI();
+    key += "_get";
     return getMockResponse(HttpMethod.GET, key);
   }
 
@@ -75,13 +79,13 @@ public class Application {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     APIData apiData = gson.fromJson(str, APIData.class);
-    Thread.sleep(apiData.delay);
     if (apiData.method.equalsIgnoreCase(httpMethod.name())) {
       HttpHeaders headers = new HttpHeaders();
       if (apiData.produce != null) {
         headers.add("content-type", apiData.produce);
       }
       log("found and returned value for key: " + url + ", method: " + httpMethod);
+      Thread.sleep(apiData.delay);
       return new ResponseEntity<>("" + apiData.body, headers,
           HttpStatus.valueOf(apiData.statusCode));
     }
