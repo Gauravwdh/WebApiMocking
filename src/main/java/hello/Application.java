@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -79,18 +80,22 @@ public class Application {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     APIData apiData = gson.fromJson(str, APIData.class);
-    if (apiData.method.equalsIgnoreCase(httpMethod.name())) {
-      HttpHeaders headers = new HttpHeaders();
-      if (apiData.produce != null) {
-        headers.add("content-type", apiData.produce);
-      }
-      log("found and returned value for key: " + url + ", method: " + httpMethod);
-      Thread.sleep(apiData.delay);
-      return new ResponseEntity<>("" + apiData.body, headers,
-          HttpStatus.valueOf(apiData.statusCode));
+    if (!apiData.method.equalsIgnoreCase(httpMethod.name())) {
+      log("Value found for key: " + url + ", but different method: " + apiData);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    log("Value found for key: " + url + ", but different method: " + apiData);
-    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    HttpHeaders headers = new HttpHeaders();
+    if (StringUtils.isEmpty(apiData.produce)) {
+      headers.add("content-type", "application/json");
+    }
+    if (apiData.statusCode == 0) {
+      log("setting default status code for url: " + url + " : " + 200);
+      apiData.statusCode = HttpStatus.OK.value();
+    }
+    log("found and returned value for key: " + url + ", method: " + httpMethod);
+    Thread.sleep(apiData.delay);
+    return new ResponseEntity<>("" + apiData.body, headers,
+        HttpStatus.valueOf(apiData.statusCode));
   }
 
   public static void main(String[] args) throws Exception {
