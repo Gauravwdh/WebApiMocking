@@ -1,7 +1,5 @@
 package hello;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class Application {
 
-  private static Gson gson;
   private static Jedis jedis;
 
   @RequestMapping(value = "/mock_create/**", method = RequestMethod.POST, produces = {
@@ -35,7 +32,7 @@ public class Application {
       @RequestBody String body) {
     String key = request.getRequestURI();
     key = key.replace("mock_create", "mock");
-    APIData apiData = gson.fromJson(body, APIData.class);
+    APIData apiData = Mapper.getInstance().read(body, APIData.class);
     if (apiData == null) {
       log("Unable to save value for key: " + key + " value is null: " + body);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -79,7 +76,7 @@ public class Application {
       log("Value not found for key: " + url);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    APIData apiData = gson.fromJson(str, APIData.class);
+    APIData apiData = Mapper.getInstance().read(str, APIData.class);
     if (!apiData.method.equalsIgnoreCase(httpMethod.name())) {
       log("Value found for key: " + url + ", but different method: " + apiData);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -99,7 +96,6 @@ public class Application {
   }
 
   public static void main(String[] args) throws Exception {
-    gson = new Gson();
     jedis = new Jedis("redis");
     String auth = System.getenv("auth");
     System.out.println("Redis auth: " + auth);
